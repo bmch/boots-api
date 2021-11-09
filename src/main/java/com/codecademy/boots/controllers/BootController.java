@@ -69,63 +69,63 @@ public class BootController {
             return null;
         }
         Boot bootToIncrement = bootToIncrementOptional.get();
+        Integer quant = bootToIncrement.getQuantity()+1;
+        System.out.println("quant is "+ quant);
+        bootToIncrement.setQuantity(quant);
       //  this.bootRepository.delete(bootToDelete);
-        return bootToIncrement;
+        return this.bootRepository.save(bootToIncrement);
     }
 
     @PutMapping("/{id}/quantity/decrement")
     public Boot decrementQuantity(@PathVariable("id") Integer id) {
-        throw new NotImplementedException("Don't have the ability to decrement boot counts yet!");
+        Optional<Boot> bootToDecrementOptional = this.bootRepository.findById(id);
+        if (!bootToDecrementOptional.isPresent()) {
+            return null;
+        }
+        Boot bootToDecrement = bootToDecrementOptional.get();
+        if(bootToDecrement.getQuantity()>=1){
+            bootToDecrement.setQuantity(bootToDecrement.getQuantity()-1);
+            this.bootRepository.save(bootToDecrement);
+        }
+        return bootToDecrement;
     }
 
     @GetMapping("/search")
     public List<Boot> searchBoots(@RequestParam(required = false) String material,
-                                  @RequestParam(required = false) BootType type, @RequestParam(required = false) Float size,
-                                  @RequestParam(required = false, name = "quantity") Integer minQuantity) throws QueryNotSupportedException {
+                                  @RequestParam(required = false) BootType type,
+                                  @RequestParam(required = false) Float size,
+                                  @RequestParam(required = false, name = "quantity") Integer minQuantity)
+            throws QueryNotSupportedException {
         if (Objects.nonNull(material)) {
             if (Objects.nonNull(type) && Objects.nonNull(size) && Objects.nonNull(minQuantity)) {
-                // call the repository method that accepts a material, type, size, and minimum
-                // quantity
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findByMaterialAndTypeAndSizeAndQuantityGreaterThan(material,type,size,minQuantity);
             } else if (Objects.nonNull(type) && Objects.nonNull(size)) {
-                // call the repository method that accepts a material, size, and type
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findByMaterialAndTypeAndSize(material,type,size);
             } else if (Objects.nonNull(type) && Objects.nonNull(minQuantity)) {
-                // call the repository method that accepts a material, a type, and a minimum
-                // quantity
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findByMaterialAndTypeAndQuantityGreaterThan(material,type,minQuantity);
             } else if (Objects.nonNull(type)) {
-                // call the repository method that accepts a material and a type
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                    return this.bootRepository.findByMaterialAndType(material,type);
             } else {
-                // call the repository method that accepts only a material
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+               return this.bootRepository.findByMaterial(material);
             }
         } else if (Objects.nonNull(type)) {
             if (Objects.nonNull(size) && Objects.nonNull(minQuantity)) {
-                // call the repository method that accepts a type, size, and minimum quantity
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findByTypeAndSizeAndQuantityGreaterThan( type,size, minQuantity);
             } else if (Objects.nonNull(size)) {
-                // call the repository method that accepts a type and a size
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findByTypeAndSize(type,size);
             } else if (Objects.nonNull(minQuantity)) {
-                // call the repository method that accepts a type and a minimum quantity
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findByTypeAndQuantityGreaterThan(type, minQuantity);
             } else {
-                // call the repository method that accept only a type
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findByType(type);
             }
         } else if (Objects.nonNull(size)) {
             if (Objects.nonNull(minQuantity)) {
-                // call the repository method that accepts a size and a minimum quantity
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+                return this.bootRepository.findBySizeAndQuantityGreaterThan(size,minQuantity);
             } else {
-                // call the repository method that accepts only a size
-                throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
-            }
+                return this.bootRepository.findBySize(size);
+                }
         } else if (Objects.nonNull(minQuantity)) {
-            // call the repository method that accepts only a minimum quantity
-            throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
+           return this.bootRepository.findByQuantityGreaterThan(minQuantity);
         } else {
             throw new QueryNotSupportedException("This query is not supported! Try a different combination of search parameters.");
         }
